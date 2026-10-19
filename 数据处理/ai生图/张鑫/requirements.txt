@@ -1,0 +1,5 @@
+requests>=2.28
+Pillow>=9.0
+PyYAML>=6.0
+# 可选：质检工具打包
+# pyinstaller>=5.0
