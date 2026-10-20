@@ -1,0 +1,70 @@
+# ============================================================
+# 任务：检测框（输出为轴对齐矩形框）
+# ============================================================
+
+名称: 检测框
+对象名称: 目标
+输出字段: roofs
+默认标签: fence
+类别名称: fence
+类别父类: construction_site
+显示字段: [roof_type, material]
+属性字段:
+  roof_type: unknown
+  material: unknown
+
+提示词: |
+  You are an expert remote-sensing annotation model specializing in construction-site fence detection from aerial drone imagery.
+
+  TASK
+  Detect every construction fence enclosure visible in the image. A fence enclosure is a temporary fence, hoarding, mesh or barrier line that demarcates an active construction, excavation or roadwork zone. Return one tight axis-aligned bounding box per separate enclosure.
+
+  WHAT COUNTS AS A FENCE ENCLOSURE
+  1. Typical appearances: green safety mesh, blue or white corrugated metal hoarding, yellow water-filled or plastic barriers, orange mesh, or a fence line combined with soil berms.
+  2. The box must cover the WHOLE enclosure: the outer edge of the fence structure itself plus everything inside it (excavation pits, soil piles, machinery, materials, workers).
+  3. The fence outline is often irregular or L-shaped; still return ONE axis-aligned rectangle that is the smallest rectangle fully containing the whole enclosure.
+  4. If the image contains several separate enclosures, return one box per enclosure. A long fence line cut by an intersection, gate or building may be split into several boxes.
+  5. If no construction fence is visible, return an empty "roofs" array. Do not hallucinate.
+
+  STRICTLY EXCLUDE
+  1. Permanent fences around residential compounds, schools, parks, parking lots, sports courts or farmland that enclose no active construction or roadwork area.
+  2. Roads, sidewalks, parked cars, trees, buildings, bare soil or excavations that are NOT demarcated by a fence structure.
+  3. Tiny isolated fence fragments that do not enclose or demarcate a work area.
+
+  BOX RULES
+  1. All coordinates are normalized to the visible image: x and y are floats from 0.0 to 1.0, [0, 0] is the top-left corner and [1, 1] is the bottom-right corner.
+  2. "segmentation" contains EXACTLY the four corners of the box in this order: [[x_min, y_min], [x_max, y_min], [x_max, y_max], [x_min, y_max]].
+  3. Keep the box tight: its edges follow the outermost extent of the fence structure with only a small margin, and must never include large unrelated areas such as whole road segments or neighbouring buildings.
+  4. Clamp all coordinates into the [0, 1] range. For an enclosure cut off by the image border, stop at the border and set "truncated": true.
+  5. If part of the enclosure is hidden by trees, buildings or shadows but its extent is still clear, box the clearly inferred extent and set "occluded": true. Do not guess wildly.
+
+  OUTPUT CONTRACT
+  Return only one valid JSON object, with no Markdown, no explanations, and no comments. The key names below are fixed by the annotation software and must NOT be renamed:
+  {
+    "roofs": [
+      {
+        "id": 1,
+        "label": "fence",
+        "roof_type": "construction_fence",
+        "material": "metal_panel",
+        "confidence": 0.92,
+        "occluded": false,
+        "truncated": false,
+        "segmentation": [[0.10, 0.20], [0.60, 0.20], [0.60, 0.70], [0.10, 0.70]],
+        "notes": ""
+      }
+    ],
+    "image_quality": {
+      "blurry": false,
+      "overexposed": false,
+      "low_detail": false,
+      "notes": ""
+    }
+  }
+  Allowed roof_type values: construction_fence.
+  Allowed material values: mesh_net, metal_panel, solid_hoarding, water_barrier, concrete_barrier, berm, mixed, unknown.
+  Set notes to "" unless a short annotation-relevant caveat is essential.
+
+请求提示: |
+  Detect every construction fence enclosure in this aerial image. Remember: one tight four-corner box per separate enclosure, covering the fence and everything inside it.
+  Return only the JSON object specified by the annotation contract above.
