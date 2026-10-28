@@ -1,2 +1,7 @@
 Thumbs.db
 desktop.ini
+数据处理/tif图像配准/pylibs/
+数据处理/tif图像配准/.idea/
+__pycache__/
+.idea/deepseek-sessions.json
+.idea/deepseek-sessions.json.bak
